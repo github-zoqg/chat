@@ -1,32 +1,6 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <el-button @click="send">send message</el-button>
   </div>
 </template>
 
@@ -35,6 +9,58 @@ export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+  data(){
+    return {
+      ws: null
+    }
+  },
+  mounted(){
+    this.init()
+  },
+  methods:{
+    init(){
+      console.log('%c初始化','color:blue')
+        if ("WebSocket" in window)
+        {
+            console.log("您的浏览器支持 WebSocket!");
+
+            // 打开一个 web socket
+            const ws = new WebSocket("ws://localhost:8088");
+            this.ws = ws
+
+            ws.onopen = function()
+            {
+              // Web Socket 已连接上，使用 send() 方法发送数据
+              ws.send(JSON.stringify({type: 'server', content:{ name: 'text',context:'测试数据'}}));
+              console.log("数据发送中...");
+            };
+
+            ws.onmessage = function (evt){
+              const received_msg = JSON.parse(evt.data);
+              console.log("数据已接收...",evt);
+              if(received_msg){
+                console.log(received_msg)
+              }
+            };
+
+            ws.onclose = function()
+            {
+              // 关闭 websocket
+              alert("连接已关闭...");
+            };
+        }
+
+        else
+        {
+            // 浏览器不支持 WebSocket
+            alert("您的浏览器不支持 WebSocket!");
+        }
+    },
+    send(){
+      console.log(this.ws)
+        this.ws.send(JSON.stringify({type: 'server', content:{ name: 'text',context:'测试数据'}}));
+    }
   }
 }
 </script>
